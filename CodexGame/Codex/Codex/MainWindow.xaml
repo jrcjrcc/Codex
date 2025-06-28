@@ -1,0 +1,370 @@
+﻿<Window x:Class="CodexCardGame.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CodexCardGame"
+        mc:Ignorable="d"
+        Title="法典卡牌对战" Height="750" Width="1100"
+        Background="#0F0F1B">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <!-- 基础文本样式 -->
+            <Style TargetType="TextBlock">
+                <Setter Property="Foreground" Value="#E0E0FF"/>
+                <Setter Property="FontFamily" Value="Segoe UI, Microsoft YaHei UI"/>
+            </Style>
+
+            <!-- 按钮通用样式 -->
+            <Style TargetType="Button">
+                <Setter Property="Background" Value="#30305A"/>
+                <Setter Property="BorderBrush" Value="#5C5C8A"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="Padding" Value="8,4"/>
+                <Setter Property="Margin" Value="0,0,10,0"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" 
+                                    BorderBrush="{TemplateBinding BorderBrush}" 
+                                    BorderThickness="{TemplateBinding BorderThickness}" 
+                                    CornerRadius="3">
+                                <ContentPresenter Content="{TemplateBinding Content}" 
+                                                  HorizontalAlignment="Center" 
+                                                  VerticalAlignment="Center"
+                                                  Margin="{TemplateBinding Padding}"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#464688"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter Property="Background" Value="#202048"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- 状态值卡片样式 -->
+            <Style x:Key="StatCard" TargetType="Border">
+                <Setter Property="Background" Value="#1A1A3A"/>
+                <Setter Property="CornerRadius" Value="4"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="BorderBrush" Value="#4A4A8A"/>
+                <Setter Property="Padding" Value="10,5"/>
+                <Setter Property="Margin" Value="0,0,15,0"/>
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect BlurRadius="5" ShadowDepth="1" Color="#66000000"/>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- 卡牌样式 -->
+            <Style x:Key="PlayingCard" TargetType="Border">
+                <Setter Property="Background" Value="#252550"/>
+                <Setter Property="CornerRadius" Value="6"/>
+                <Setter Property="Width" Value="70"/>
+                <Setter Property="Height" Value="100"/>
+                <Setter Property="Margin" Value="5,0"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="BorderBrush" Value="#6A6AAA"/>
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect BlurRadius="5" ShadowDepth="2" Color="#77000000"/>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- 战场格子样式 -->
+            <Style x:Key="BattleSlot" TargetType="Border">
+                <Setter Property="Background" Value="#1E1E4F"/>
+                <Setter Property="CornerRadius" Value="4"/>
+                <Setter Property="Width" Value="70"/>
+                <Setter Property="Height" Value="90"/>
+                <Setter Property="Margin" Value="5"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="BorderBrush" Value="#5656A0"/>
+            </Style>
+
+            <!-- 战技标签样式 -->
+            <Style x:Key="SkillTabItem" TargetType="RadioButton">
+                <Setter Property="GroupName" Value="SkillTabs"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="RadioButton">
+                            <Border Name="Border" 
+                                    Background="#252550" 
+                                    BorderThickness="0,0,0,2"
+                                    BorderBrush="Transparent"
+                                    CornerRadius="3,3,0,0"
+                                    Padding="10,5,10,8">
+                                <TextBlock Text="{TemplateBinding Content}"
+                                           FontWeight="Bold"
+                                           HorizontalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="Border" Property="BorderBrush" Value="#FFD700"/>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Border" Property="Background" Value="#303070"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- 战技列表项样式 -->
+            <Style x:Key="SkillItem" TargetType="Border">
+                <Setter Property="Background" Value="#252550"/>
+                <Setter Property="Margin" Value="0,0,0,10"/>
+                <Setter Property="CornerRadius" Value="4"/>
+                <Setter Property="Padding" Value="5"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="BorderBrush" Value="#454580"/>
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid>
+        <!-- 定义行和列 -->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- 顶部状态栏 -->
+            <RowDefinition Height="*"/>
+            <!-- 主内容区（战场+战技） -->
+            <RowDefinition Height="Auto"/>
+            <!-- 手牌区 -->
+            <RowDefinition Height="Auto"/>
+            <!-- 操作按钮区 -->
+        </Grid.RowDefinitions>
+
+        <!-- 顶部状态栏 -->
+        <Border Grid.Row="0" Background="#151530" Padding="20,10">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <!-- 行动点数 -->
+                <Border Style="{StaticResource StatCard}">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="行动点数" FontWeight="Bold" Margin="0,0,10,0"/>
+                        <TextBlock Name="Score"  Text="{Binding Score}" Foreground="#7BFF70" FontSize="18" FontWeight="Bold"/>
+                        <TextBlock Text="/" FontSize="18" Margin="2,0"/>
+                        <TextBlock Text="12" FontSize="18" Foreground="#AAAAFF"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- 重心值 -->
+                <Border Style="{StaticResource StatCard}">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="重心值" FontWeight="Bold" Margin="0,0,10,0"/>
+                        <TextBlock Name="Weight" Text="3" Foreground="#FFAF70" FontSize="18" FontWeight="Bold"/>
+                        <TextBlock Text="/" FontSize="18" Margin="2,0"/>
+                        <TextBlock Text="3" FontSize="18" Foreground="#AAAAFF"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- 体力值 -->
+                <Border Style="{StaticResource StatCard}">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="体力值" FontWeight="Bold" Margin="0,0,10,0"/>
+                        <TextBlock Name="Myhealth" Text="40" Foreground="#FF7070" FontSize="18" FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- 对手体力 -->
+                <Border Style="{StaticResource StatCard}">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="对手体力" FontWeight="Bold" Margin="0,0,10,0"/>
+                        <TextBlock Name="HisHealth"  Text="40" Foreground="#FF7070" FontSize="18" FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- 距离 -->
+                <Border Style="{StaticResource StatCard}">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="距离" FontWeight="Bold" Margin="0,0,10,0"/>
+                        <TextBlock x:Name="Distance"  Text="5" Foreground="#70B0FF" FontSize="18" FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+
+        <!-- 主内容区 -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="250"/>
+                <!-- 战技区宽度 -->
+                <ColumnDefinition Width="*"/>
+                <!-- 中央战场区 -->
+            </Grid.ColumnDefinitions>
+
+            <!-- 左侧战技区 -->
+            <Border Grid.Column="0" Background="#151530" Margin="0,10,10,10" CornerRadius="0,0,8,8" Padding="10">
+                <StackPanel>
+                    <TextBlock Text="战技区" FontSize="18" FontWeight="Bold" Margin="0,0,0,10" Foreground="#FFD700"/>
+
+                    <!-- 流派标签组 -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <RadioButton Style="{StaticResource SkillTabItem}" Content="拳" IsChecked="True"/>
+                        <RadioButton Style="{StaticResource SkillTabItem}" Content="剑"/>
+                        <RadioButton Style="{StaticResource SkillTabItem}" Content="枪"/>
+                        <RadioButton Style="{StaticResource SkillTabItem}" Content="火枪"/>
+                        <RadioButton Style="{StaticResource SkillTabItem}" Content="空间"/>
+                    </StackPanel>
+
+                    <!-- 战技列表 -->
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <!-- 直冲 -->
+                            <Border Style="{StaticResource SkillItem}">
+                                <StackPanel>
+                                    <TextBlock Text="直冲" FontWeight="Bold" FontSize="14" Foreground="#FFD700"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                        <TextBlock Text="类型:" Foreground="#70FFB0"/>
+                                        <TextBlock Text="普通" Margin="5,0,20,0"/>
+                                        <TextBlock Text="距离:" Foreground="#70FFB0"/>
+                                        <TextBlock Text="1-2" Margin="5,0"/>
+                                    </StackPanel>
+                                    <TextBlock Text="伤害:2" Margin="0,2,0,5" Foreground="#FF7070"/>
+                                    <TextBlock Text="前置效果:可向前一步" FontSize="11" Foreground="#70B0FF"/>
+                                    <TextBlock Text="后续效果:击退一步，抽一张牌" FontSize="11" Foreground="#70B0FF"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- 钩拳 -->
+                            <Border Style="{StaticResource SkillItem}">
+                                <StackPanel>
+                                    <TextBlock Text="钩拳" FontWeight="Bold" FontSize="14" Foreground="#FFD700"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                        <TextBlock Text="类型:" Foreground="#70FFB0"/>
+                                        <TextBlock Text="迅捷" Margin="5,0,20,0" Foreground="#70FF70"/>
+                                        <TextBlock Text="距离:" Foreground="#70FFB0"/>
+                                        <TextBlock Text="1-2" Margin="5,0"/>
+                                    </StackPanel>
+                                    <TextBlock Text="伤害:2" Margin="0,2,0,5" Foreground="#FF7070"/>
+                                    <TextBlock Text="特殊:可插入对手行动" FontSize="11" Foreground="#70B0FF"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </StackPanel>
+            </Border>
+
+            <!-- 中央战场区 -->
+            <Border Grid.Column="1" Background="#151530" Margin="10,10,0,10" CornerRadius="0,0,8,8" Padding="10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="战场区域" FontSize="18" FontWeight="Bold" Margin="0,0,0,10" Foreground="#FFD700"/>
+
+                    <!-- 1×9直线战场 -->
+                    <ItemsControl Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+
+                        <!-- 位置1-10，示例显示10个位置 -->
+                        <Border Style="{StaticResource BattleSlot}">
+                            <TextBlock Text="1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" Foreground="#70FF70"/>
+                        </Border>
+                        <Border Style="{StaticResource BattleSlot}">
+                            <TextBlock Text="2" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16"/>
+                        </Border>
+                        <Border Style="{StaticResource BattleSlot}">
+                            <TextBlock Text="3" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16"/>
+                        </Border>
+                        <Border Style="{StaticResource BattleSlot}">
+                            <TextBlock Text="4" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16"/>
+                        </Border>
+                        <Border Style="{StaticResource BattleSlot}">
+                            <TextBlock Text="5" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16"/>
+                        </Border>
+                        <Border Style="{StaticResource BattleSlot}">
+                            <TextBlock Text="6" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16"/>
+                        </Border>
+                        <Border Style="{StaticResource BattleSlot}">
+                            <TextBlock Text="7" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16"/>
+                        </Border>
+                        <Border Style="{StaticResource BattleSlot}">
+                            <TextBlock Text="8" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16"/>
+                        </Border>
+                        <Border Style="{StaticResource BattleSlot}">
+                            <TextBlock Text="9" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16"/>
+                        </Border>
+                    </ItemsControl>
+
+                    <!-- 玩家标记 -->
+                    <TextBlock Text="我" Grid.Row="1" Margin="-25,0,0,0" 
+                               HorizontalAlignment="Center" VerticalAlignment="Top" 
+                               Foreground="#70FF70" FontWeight="Bold"
+                               RenderTransformOrigin="0.5,0.5">
+                        <TextBlock.RenderTransform>
+                            <TranslateTransform X="-100" Y="40"/>
+                        </TextBlock.RenderTransform>
+                    </TextBlock>
+
+                    <!-- 敌人标记 -->
+                    <TextBlock Text="敌" Grid.Row="1" Margin="0,0,-25,0" 
+                               HorizontalAlignment="Center" VerticalAlignment="Top" 
+                               Foreground="#FF7070" FontWeight="Bold"
+                               RenderTransformOrigin="0.5,0.5">
+                        <TextBlock.RenderTransform>
+                            <TranslateTransform X="100" Y="40"/>
+                        </TextBlock.RenderTransform>
+                    </TextBlock>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- 手牌区 -->
+        <Border Grid.Row="2" Background="#151530" Padding="20,10">
+            <StackPanel>
+                <TextBlock Text="手牌区" FontSize="16" FontWeight="Bold" Margin="0,0,0,10" Foreground="#FFD700"/>
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <!-- 手牌示例 -->
+                        <Border Style="{StaticResource PlayingCard}">
+                            <TextBlock Text="♥5" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18" Foreground="Red"/>
+                        </Border>
+                        <Border Style="{StaticResource PlayingCard}">
+                            <TextBlock Text="♠A" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18" Foreground="Black"/>
+                        </Border>
+                        <Border Style="{StaticResource PlayingCard}">
+                            <TextBlock Text="♣7" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18" Foreground="Black"/>
+                        </Border>
+                        <Border Style="{StaticResource PlayingCard}">
+                            <TextBlock Text="♦3" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18" Foreground="Red"/>
+                        </Border>
+                        <Border Style="{StaticResource PlayingCard}">
+                            <TextBlock Text="♠8" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18" Foreground="Black"/>
+                        </Border>
+                        <Border Style="{StaticResource PlayingCard}">
+                            <TextBlock Text="♥K" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18" Foreground="Red"/>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </StackPanel>
+        </Border>
+
+        <!-- 操作按钮区 -->
+        <Border Grid.Row="3" Background="#151530" Padding="20,10" CornerRadius="0,0,8,8">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Content="发动战技" Width="120" Height="35" Background="#3070D0" BorderBrush="#70B0FF" FontSize="14"/>
+                <Button Content="弃牌" Width="100" Height="35" Margin="15,0,0,0" Background="#B07030" BorderBrush="#FFD070" FontSize="14"/>
+                <Button Content="结束回合" Width="100" Height="35" Margin="15,0,0,0" Background="#D04040" BorderBrush="#FF7070" FontSize="14"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

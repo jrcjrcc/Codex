@@ -1,0 +1,16 @@
+D:\文档\CodexGame\Codex\Codex\obj\Debug\Codex.csproj.AssemblyReference.cache
+D:\文档\CodexGame\Codex\Codex\obj\Debug\MainWindow.g.cs
+D:\文档\CodexGame\Codex\Codex\obj\Debug\App.g.cs
+D:\文档\CodexGame\Codex\Codex\obj\Debug\Codex_MarkupCompile.cache
+D:\文档\CodexGame\Codex\Codex\obj\Debug\Codex_MarkupCompile.lref
+D:\文档\CodexGame\Codex\Codex\bin\Debug\Codex.exe.config
+D:\文档\CodexGame\Codex\Codex\bin\Debug\Codex.exe
+D:\文档\CodexGame\Codex\Codex\bin\Debug\Codex.pdb
+D:\文档\CodexGame\Codex\Codex\obj\Debug\MainWindow.baml
+D:\文档\CodexGame\Codex\Codex\obj\Debug\Codex.g.resources
+D:\文档\CodexGame\Codex\Codex\obj\Debug\Codex.Properties.Resources.resources
+D:\文档\CodexGame\Codex\Codex\obj\Debug\Codex.csproj.GenerateResource.cache
+D:\文档\CodexGame\Codex\Codex\obj\Debug\Codex.csproj.CoreCompileInputs.cache
+D:\文档\CodexGame\Codex\Codex\obj\Debug\Codex.exe
+D:\文档\CodexGame\Codex\Codex\obj\Debug\Codex.pdb
+D:\文档\CodexGame\Codex\Codex\obj\Debug\Codex.exe.config
